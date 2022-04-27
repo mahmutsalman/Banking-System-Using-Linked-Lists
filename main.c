@@ -41,7 +41,12 @@ struct bank{
 };
 
 int main() {
-    printf("Hello, World!\n");
+    printf("1)Read operations types from the file\n");
+    printf("2)Read branches from the file\n");
+    printf("3)Read customers from the file\n");
+    printf("4)Read customer transactions from the file\n");
+    printf("5)Calculate paid commission amount of each customers in each branches\n");
+
     return 0;
 
 }
