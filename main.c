@@ -42,13 +42,13 @@ struct bank {
     struct operation_type *optypes;// to hold the transaction types offered by the bank
 };
 
-void readOperationTypes(struct operation_type *operationType,char *inputFile ) {
+void readOperationTypes(struct operation_type *operationType, char *inputFile) {
 
     FILE *fPtr;
     char fileNamex[100];
-    strcpy(fileNamex,"C:\\Users\\asxdc\\CLionProjects\\DataProject-1\\");
+    strcpy(fileNamex, "C:\\Users\\asxdc\\CLionProjects\\DataProject-1\\");
 
-    strcat(fileNamex,inputFile);
+    strcat(fileNamex, inputFile);
     fPtr = fopen(fileNamex, "r");
     if (fPtr == NULL) {
         printf("There is a error opening the file.");
@@ -56,21 +56,20 @@ void readOperationTypes(struct operation_type *operationType,char *inputFile ) {
     }
 
     char entity[20];
-    int iterator=0;
+    int iterator = 0;
 
     while (fscanf(fPtr, "%s", &entity) != EOF) {
         // Add this to linked list
-        if (iterator%2==0) {
+        if (iterator % 2 == 0) {
             memcpy(operationType->optname, entity, sizeof(entity));
             iterator++;
 
-        }
-        else{
-            operationType->commission=atof(entity);
+        } else {
+            operationType->commission = atof(entity);
             iterator++;
             // Go to next operation_type nextopt;
             operationType->nextopt = malloc(sizeof(struct operation_type));
-            operationType=operationType->nextopt;
+            operationType = operationType->nextopt;
 
         }
 
@@ -79,10 +78,34 @@ void readOperationTypes(struct operation_type *operationType,char *inputFile ) {
 
 
 }
+
+void readBranches(struct bank *bank, char *inputFile) {
+    FILE *fPtr;
+    char fileNamex[100];
+    strcpy(fileNamex, "C:\\Users\\asxdc\\CLionProjects\\DataProject-1\\");
+
+    strcat(fileNamex, inputFile);
+    fPtr = fopen(fileNamex, "r");
+    if (fPtr == NULL) {
+        printf("There is a error opening the file.");
+
+    }
+
+    char entity[20];
+    while (fscanf(fPtr, "%s", &entity) != EOF) {
+        // Add this to linked list
+
+        memcpy(bank->branches, entity, sizeof(entity));
+        bank->branches = bank->branches->nextb;
+
+
+    }
+}
+
 /* Print all the elements in the linked list */
 void print(struct operation_type *head) {
     struct operation_type *current_node = head;
-    while ( current_node != NULL) {
+    while (current_node != NULL) {
         printf("%s ", current_node->optname);
         printf("%f\n ", current_node->commission);
 
@@ -92,11 +115,11 @@ void print(struct operation_type *head) {
 
 
 int main() {
-    printf("%s","1)Read operations types from the file\n");
-    printf("%s","2)Read branches from the file\n");
-    printf("%s","3)Read customers from the file\n");
-    printf("%s","4)Read customer transactions from the file\n");
-    printf("%s","5)Calculate paid commission amount of each customers in each branches\n");
+    printf("%s", "1)Read operations types from the file\n");
+    printf("%s", "2)Read branches from the file\n");
+    printf("%s", "3)Read customers from the file\n");
+    printf("%s", "4)Read customer transactions from the file\n");
+    printf("%s", "5)Calculate paid commission amount of each customers in each branches\n");
 
 
     struct operation_type *head = malloc(sizeof(struct operation_type));
@@ -105,14 +128,13 @@ int main() {
     scanf("%d", &option);
 
 
-
     switch (option) {
         case 1:
-            printf("%s","Please enter the name of the file :");
+            printf("%s", "Please enter the name of the file :");
             char filename[20];
-            scanf("%s",filename);
+            scanf("%s", filename);
 
-            readOperationTypes(head,filename);
+            readOperationTypes(head, filename);
             // Print all operation types which is in head
             print(head);
 
