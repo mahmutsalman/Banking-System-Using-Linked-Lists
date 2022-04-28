@@ -42,10 +42,14 @@ struct bank {
     struct operation_type *optypes;// to hold the transaction types offered by the bank
 };
 
-void readOperationTypes(struct operation_type *operationType) {
+void readOperationTypes(struct operation_type *operationType,char *inputFile ) {
 
     FILE *fPtr;
-    fPtr = fopen("C:\\Users\\asxdc\\CLionProjects\\DataProject-1\\input_file.txt", "r");
+    char fileNamex[100];
+    strcpy(fileNamex,"C:\\Users\\asxdc\\CLionProjects\\DataProject-1\\");
+
+    strcat(fileNamex,inputFile);
+    fPtr = fopen(fileNamex, "r");
     if (fPtr == NULL) {
         printf("There is a error opening the file.");
 
@@ -55,7 +59,6 @@ void readOperationTypes(struct operation_type *operationType) {
     int iterator=0;
 
     while (fscanf(fPtr, "%s", &entity) != EOF) {
-        printf("Name : %s\n", entity);
         // Add this to linked list
         if (iterator%2==0) {
             memcpy(operationType->optname, entity, sizeof(entity));
@@ -76,14 +79,24 @@ void readOperationTypes(struct operation_type *operationType) {
 
 
 }
+/* Print all the elements in the linked list */
+void print(struct operation_type *head) {
+    struct operation_type *current_node = head;
+    while ( current_node != NULL) {
+        printf("%s ", current_node->optname);
+        printf("%f\n ", current_node->commission);
+
+        current_node = current_node->nextopt;
+    }
+}
 
 
 int main() {
-    printf("1)Read operations types from the file\n");
-    printf("2)Read branches from the file\n");
-    printf("3)Read customers from the file\n");
-    printf("4)Read customer transactions from the file\n");
-    printf("5)Calculate paid commission amount of each customers in each branches\n");
+    printf("%s","1)Read operations types from the file\n");
+    printf("%s","2)Read branches from the file\n");
+    printf("%s","3)Read customers from the file\n");
+    printf("%s","4)Read customer transactions from the file\n");
+    printf("%s","5)Calculate paid commission amount of each customers in each branches\n");
 
 
     struct operation_type *head = malloc(sizeof(struct operation_type));
@@ -91,11 +104,28 @@ int main() {
     int option;
     scanf("%d", &option);
 
+
+
     switch (option) {
         case 1:
-            readOperationTypes(head);
+            printf("%s","Please enter the name of the file :");
+            char filename[20];
+            scanf("%s",filename);
+
+            readOperationTypes(head,filename);
+            // Print all operation types which is in head
+            print(head);
+
             break;
         case 2:
+            break;
+
+        case 3:
+            break;
+        case 4:
+            break;
+        case 5:
+            break;
 
         default:;
 
