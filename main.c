@@ -92,6 +92,7 @@ void readBranches(struct bank *bank, char *inputFile) {
     }
 
     int index = 1;
+    //Create branch
     struct branch *new_branch = malloc(sizeof(struct branch));
 
     char entity[20];
@@ -104,6 +105,7 @@ void readBranches(struct bank *bank, char *inputFile) {
             bank->branches = new_branch;
             new_branch->nextb = malloc(sizeof(struct branch));
             //Go next branch
+            new_branch->nextb=NULL;
             new_branch = new_branch->nextb;
             index++;
 
@@ -112,6 +114,7 @@ void readBranches(struct bank *bank, char *inputFile) {
 
             // Go next branch
             new_branch->nextb = malloc(sizeof(struct branch));
+            new_branch->nextb=NULL;
             new_branch = new_branch->nextb;
 
         }
@@ -143,11 +146,18 @@ void printBranches(struct bank *head) {
 
 
 int main() {
+    setbuf(stdout, 0);
     printf("%s", "1)Read operations types from the file\n");
+    setbuf(stdout, 0);
     printf("%s", "2)Read branches from the file\n");
+    setbuf(stdout, 0);
     printf("%s", "3)Read customers from the file\n");
+    setbuf(stdout, 0);
     printf("%s", "4)Read customer transactions from the file\n");
+    setbuf(stdout, 0);
     printf("%s", "5)Calculate paid commission amount of each customers in each branches\n");
+
+
 
 
     struct operation_type *headOp = malloc(sizeof(struct operation_type));
@@ -160,6 +170,8 @@ int main() {
 
     switch (option) {
         case 1:
+            setbuf(stdout, 0);
+
             printf("%s", "Please enter the name of the file :");
             char filenameOpTypes[20];
             scanf("%s", filenameOpTypes);
