@@ -91,19 +91,37 @@ void readBranches(struct bank *bank, char *inputFile) {
 
     }
 
+    int index = 1;
+    struct branch *new_branch = malloc(sizeof(struct branch));
+
     char entity[20];
     while (fscanf(fPtr, "%s", &entity) != EOF) {
         // Add this to linked list
+        //First create space for new branch on memory
 
-        memcpy(bank->branches, entity, sizeof(entity));
-        bank->branches = bank->branches->nextb;
+        if (index == 1) {
+            memcpy(new_branch->bname, entity, sizeof(entity));
+            bank->branches = new_branch;
+            new_branch->nextb = malloc(sizeof(struct branch));
+            //Go next branch
+            new_branch = new_branch->nextb;
+            index++;
+
+        } else {
+            memcpy(new_branch->bname, entity, sizeof(entity));
+
+            // Go next branch
+            new_branch->nextb = malloc(sizeof(struct branch));
+            new_branch = new_branch->nextb;
+
+        }
 
 
     }
 }
 
 /* Print all the elements in the linked list */
-void print(struct operation_type *head) {
+void printOpType(struct operation_type *head) {
     struct operation_type *current_node = head;
     while (current_node != NULL) {
         printf("%s ", current_node->optname);
@@ -112,6 +130,16 @@ void print(struct operation_type *head) {
         current_node = current_node->nextopt;
     }
 }
+
+void printBranches(struct bank *head) {
+    struct branch *current_node = head->branches;
+    while (current_node != NULL) {
+        printf("%s ", current_node->bname);
+
+        current_node = current_node->nextb;
+    }
+}
+
 
 
 int main() {
@@ -122,7 +150,9 @@ int main() {
     printf("%s", "5)Calculate paid commission amount of each customers in each branches\n");
 
 
-    struct operation_type *head = malloc(sizeof(struct operation_type));
+    struct operation_type *headOp = malloc(sizeof(struct operation_type));
+    struct bank *headB = malloc(sizeof(struct bank));
+
 
     int option;
     scanf("%d", &option);
@@ -131,15 +161,20 @@ int main() {
     switch (option) {
         case 1:
             printf("%s", "Please enter the name of the file :");
-            char filename[20];
-            scanf("%s", filename);
+            char filenameOpTypes[20];
+            scanf("%s", filenameOpTypes);
 
-            readOperationTypes(head, filename);
-            // Print all operation types which is in head
-            print(head);
+            readOperationTypes(headOp, filenameOpTypes);
+            // Print all operation types which is in headOp
+            printOpType(headOp);
 
             break;
         case 2:
+            printf("%s", "Please enter the name of the file :");
+            char filenameBank[20];
+            scanf("%s", filenameBank);
+            readBranches(headB, filenameBank);
+            printBranches(headB);
             break;
 
         case 3:
