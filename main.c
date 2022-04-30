@@ -94,33 +94,42 @@ void readBranches(struct bank *bank, char *inputFile) {
 
     }
 
-
     int bno = 1;
     //Create branch
-
     char entity[20];
 
-    while (fscanf(fPtr, "%s%s", &entity) != EOF) {
+    int iterator=0;
 
-        struct branch *new_branch = malloc(sizeof(struct branch));
-        new_branch->nextb = NULL;
-        memcpy(new_branch->bname, entity, sizeof(entity));
-        new_branch->bno = bno;
-        bno++;
-        struct branch *lastNode = bank->branches;
+    while (fscanf(fPtr, "%s", &entity) != EOF) {
+        //If head is empty, add new branch into it
+        if(iterator==0){
 
-        while (lastNode->nextb != NULL) {
-            lastNode = lastNode->nextb;
+            memcpy(bank->branches->bname, entity, sizeof(entity));
+            bank->branches->bno = bno;
+            bno++;
+            iterator++;
+
         }
+        else{
+            struct branch *new_branch = malloc(sizeof(struct branch));
+            new_branch->nextb = NULL;
+            memcpy(new_branch->bname, entity, sizeof(entity));
+            new_branch->bno = bno;
+            bno++;
 
-        //add the new_branch at the end of the linked list
-        lastNode->nextb = new_branch;
+            struct branch *lastNode = bank->branches;
+
+            while(lastNode->nextb!=NULL){
+                lastNode=lastNode->nextb;
+            }
+            lastNode->nextb=new_branch;
+        }
 
 
     }
 }
 
-void readCustomers(char *inputFile) {
+void readCustomers(char *inputFile,struct bank* bank) {
     FILE *fPtr;
     char fileNamex[100];
     strcpy(fileNamex, "C:\\Users\\asxdc\\CLionProjects\\DataProject-1\\");
@@ -138,9 +147,16 @@ void readCustomers(char *inputFile) {
     int iterator = 0;
     while (fscanf(fPtr, "%s %s %s", &entity, &entity2, &entity3) != EOF) {
 
-        // entity ile 2 ikinci branche gidicem
+        // entity ile  ikinci branche gidicem,o branch bank head'in içinde
+        struct bank* banka = malloc(sizeof(struct bank));
+        while(banka->branches->bno!=entity){
+            //Go find '2'
+            banka->branches=banka->branches->nextb;
+        }
+        printf("%d",banka->branches->bname);
 
-        printf("%d", 1);
+
+
     }
 
 }
@@ -172,6 +188,10 @@ int main() {
 
     struct operation_type *headOp = malloc(sizeof(struct operation_type));
     struct bank *headB = malloc(sizeof(struct bank));
+
+    headB->branches = malloc(sizeof(struct branch));
+    headB->branches->nextb=NULL;
+
     int indexX = 0;
     while (indexX < 10) {
         printf("%s", "\n");
@@ -184,6 +204,7 @@ int main() {
         int option;
         scanf("%d", &option);
 
+        // For operation types
         if (option == 1) {
 
 
@@ -194,8 +215,11 @@ int main() {
             readOperationTypes(headOp, filenameOpTypes);
             // Print all operation types which is in headOp
             printOpType(headOp);
+            headB->optypes=headOp;
 
-        } else if (option == 2) {
+        }
+        // For bank, creating branches
+        else if (option == 2) {
             printf("%s", "Please enter the name of the file :");
             char filenameBank[20];
             scanf("%s", filenameBank);
@@ -207,7 +231,7 @@ int main() {
             printf("%s", "Please enter the name of the file :");
             char filenameBank2[20];
             scanf("%s", filenameBank2);
-            readCustomers(filenameBank2);
+            readCustomers(filenameBank2,headB);
 
         } else {
 
