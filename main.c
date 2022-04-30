@@ -2,6 +2,8 @@
 #include <string.h>
 #include <malloc.h>
 
+
+
 struct operation_type {
     char optname[100];
     float commission; //indicates how much the bank charges for the operation
@@ -103,9 +105,11 @@ void readBranches(struct bank *bank, char *inputFile) {
     while (fscanf(fPtr, "%s", &entity) != EOF) {
         //If head is empty, add new branch into it
         if(iterator==0){
-
+            bank->branches= malloc(sizeof (struct branch));
+            bank->branches->nextb=NULL;
             memcpy(bank->branches->bname, entity, sizeof(entity));
             bank->branches->bno = bno;
+            bank->branches->custs = NULL;
             bno++;
             iterator++;
 
@@ -115,6 +119,8 @@ void readBranches(struct bank *bank, char *inputFile) {
             new_branch->nextb = NULL;
             memcpy(new_branch->bname, entity, sizeof(entity));
             new_branch->bno = bno;
+            new_branch->custs= malloc(sizeof (struct customer));
+            new_branch->custs->nextc=NULL;
             bno++;
 
             struct branch *lastNode = bank->branches;
@@ -123,13 +129,26 @@ void readBranches(struct bank *bank, char *inputFile) {
                 lastNode=lastNode->nextb;
             }
             lastNode->nextb=new_branch;
+
         }
 
 
     }
 }
+struct branch  *getProperBranch(struct bank *banka,int entity){
+    for(struct branch *bp = banka->branches; bp; bp = bp->nextb){
+        if(bp->bno==entity){
+            return bp;
+        }
+
+    }
+    return NULL;
+
+}
 
 void readCustomers(char *inputFile,struct bank* bank) {
+    // Creating space for customers
+
     FILE *fPtr;
     char fileNamex[100];
     strcpy(fileNamex, "C:\\Users\\asxdc\\CLionProjects\\DataProject-1\\");
@@ -140,20 +159,40 @@ void readCustomers(char *inputFile,struct bank* bank) {
         printf("There is a error opening the file.");
 
     }
-    char entity[20];
+    int entity;
     char entity2[20];
     char entity3[20];
 
     int iterator = 0;
-    while (fscanf(fPtr, "%s %s %s", &entity, &entity2, &entity3) != EOF) {
+    while (fscanf(fPtr, "%d %s %s", &entity, &entity2, &entity3) != EOF) {
 
         // entity ile  ikinci branche gidicem,o branch bank head'in içinde
-        struct bank* banka = malloc(sizeof(struct bank));
-        while(banka->branches->bno!=entity){
-            //Go find '2'
-            banka->branches=banka->branches->nextb;
+        struct bank* banka = malloc(sizeof(struct bank)); // malloc olmasa ne olur burada
+        banka=bank;
+        // Find proper branch
+        struct branch *properBranch;
+        properBranch=getProperBranch(banka,entity);
+
+
+        struct customer *new_customer= malloc(sizeof (struct customer));
+        memcpy(new_customer->fname, entity2, sizeof(entity2));
+        memcpy(new_customer->lname, entity3, sizeof(entity3));
+        new_customer->nextc=NULL;
+
+        if(properBranch->custs==NULL){
+            properBranch->custs=new_customer;
         }
-        printf("%d",banka->branches->bname);
+        else{
+            // For the first customer? how to add first customer
+            //last node's next address will be NULL.
+            while(properBranch->custs->nextc!=NULL){
+                properBranch->custs = properBranch->custs->nextc;
+            }
+            properBranch->custs->nextc=new_customer;
+        }
+
+
+
 
 
 
@@ -182,6 +221,8 @@ void printBranches(struct bank *head) {
         current_node = current_node->nextb;
     }
 }
+
+
 
 
 int main() {
