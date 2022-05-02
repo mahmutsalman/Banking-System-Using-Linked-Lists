@@ -102,38 +102,38 @@ void readBranches(struct bank *bank, char *inputFile) {
     int bno = 1;
     //Create branch
     char entity[20];
-
     int iterator=0;
+    //Take first branch
+    struct branch *brancha;
 
     while (fscanf(fPtr, "%s", &entity) != EOF) {
-        //If head is empty, add new branch into it
+        brancha=bank->branches;
+
+
         if(iterator==0){
-            bank->branches= malloc(sizeof (struct branch));//Buna gerek olmayabilir,main içersinde zaten bu yapılıyor
-            bank->branches->nextb=NULL;
-            memcpy(bank->branches->bname, entity, sizeof(entity));
-            bank->branches->bno = bno;
-            bank->branches->custs = NULL;
+            memcpy(brancha->bname, entity, sizeof(entity));
+            brancha->nextb=NULL;
+            brancha->custs=NULL;
+            brancha->bno=bno;
             bno++;
             iterator++;
-
         }
         else{
-            struct branch *new_branch = malloc(sizeof(struct branch));
-            new_branch->nextb = NULL;
+            struct branch *new_branch= malloc(sizeof (struct branch));
             memcpy(new_branch->bname, entity, sizeof(entity));
-            new_branch->bno = bno;
-            new_branch->custs= malloc(sizeof (struct customer));
-            new_branch->custs->nextc=NULL;
+            new_branch->custs=NULL;// Do I need this?
+            new_branch->nextb=NULL;
+            new_branch->bno=bno;
             bno++;
-
-            struct branch *lastNode = bank->branches;
-
+            struct branch *lastNode=brancha;
             while(lastNode->nextb!=NULL){
                 lastNode=lastNode->nextb;
             }
-            lastNode->nextb=new_branch;
+            lastNode->nextb =new_branch;
+
 
         }
+
 
 
     }
@@ -190,7 +190,7 @@ void readCustomers(char *inputFile,struct bank* bank) {
     while (fscanf(fPtr, "%d %s %s", &entity, &entity2, &entity3) != EOF) {
 
         // entity ile  ikinci branche gidicem,o branch bank head'in içinde
-        struct bank* banka = malloc(sizeof(struct bank)); // malloc olmasa ne olur burada
+        struct bank* banka;
         banka=bank;
         // Find proper branch
         struct branch *properBranch;
@@ -206,6 +206,7 @@ void readCustomers(char *inputFile,struct bank* bank) {
 
         if(properBranch->custs==NULL){ //NEREDE SET LENIYOR BU,BRANCH YARATILIRKEN MI
             properBranch->custs=new_customer;
+
         }
         else{
             // For the first customer? how to add first customer
@@ -214,7 +215,10 @@ void readCustomers(char *inputFile,struct bank* bank) {
                 properBranch->custs = properBranch->custs->nextc;
             }
             properBranch->custs->nextc=new_customer;
+
         }
+        properBranch= getProperBranch(banka,entity);
+        fillCustomerId(properBranch);
 
 
 
@@ -315,21 +319,43 @@ void printBranches(struct bank *head) {
     }
 }
 
-//banka->branches=banka->branches->nextb;
-//banka->branches->custs=banka->branches->custs->nextc;
-//banka->branches->custs->trans->nexttr;
-void printTransactions(struct bank *banka){
+void printCustomer(struct bank *banka){
     struct branch *temp_branch=banka->branches;
-    struct customer *temp_customer=banka->branches->custs;
-    //temp_bank.branches
+    struct customer *temp_customer;
     while(temp_branch!=NULL){
         printf("%s \n",temp_branch->bname);
+        temp_customer=temp_branch->custs;
+        while(temp_customer!=NULL){
+            printf("%d %s %s\n ",temp_customer->cno,temp_customer->fname,temp_customer->lname);
+            temp_customer=temp_customer->nextc;
+        }
+        // After printing all the customers, go to next branch
+        temp_branch=temp_branch->nextb;
 
+    }
+
+
+}
+void printTransactions(struct bank *banka){
+    struct branch *temp_branch=banka->branches;
+    struct customer *temp_customer;
+    struct transaction *temp_transaction;
+
+    while(temp_branch!=NULL){
+        printf("%s \n",temp_branch->bname);
+        temp_customer=temp_branch->custs;
+        // Go through custs of temp_branch
         while(temp_customer!=NULL){
             //Print all the customer's id and name
             printf("%d %s",temp_customer->cno,temp_customer->fname);
             printf("\n");
-            temp_customer=temp_customer->nextc;
+            temp_transaction=temp_customer->trans;
+            while(temp_transaction!=NULL){
+                printf("%d %s \n",temp_transaction->tno,temp_transaction->amount);
+                temp_transaction=temp_transaction->nexttr;
+            }
+
+           temp_customer=temp_customer->nextc;
         }
         // If there is no customer go to the next branch
         temp_branch=temp_branch->nextb;
@@ -344,6 +370,8 @@ int main() {
     struct operation_type *headOp= malloc(sizeof (struct operation_type));
     headOp->nextopt=NULL;
     struct bank *headB = malloc(sizeof(struct bank));
+    headB->branches= malloc(sizeof (struct branch));
+
 
     int indexX = 0;
     while (indexX < 10) {
@@ -387,6 +415,7 @@ int main() {
             char filenameBank2[20];
             scanf("%s", filenameBank2);
             readCustomers(filenameBank2,headB);
+            printCustomer(headB);
 
         } else if(option==4) {
             printf("%s", "Please enter the name of the file :");
