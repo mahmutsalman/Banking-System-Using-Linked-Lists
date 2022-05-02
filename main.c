@@ -241,11 +241,12 @@ void readTransactions(char *inputFile,struct bank *banka){
     int tno=1;
 
     struct customer *temp_customer;
+    struct branch *properBranch;
 
     while (fscanf(fPtr, "%d %d %d %f", &entity, &entity2, &entity3,&entity4) != EOF) {
 
         //get proper branch
-        struct branch *properBranch = getProperBranch(banka,entity);
+       properBranch = getProperBranch(banka,entity);
         fillCustomerId(properBranch);
 
 
@@ -272,6 +273,7 @@ void readTransactions(char *inputFile,struct bank *banka){
             new_transaction->amount=entity4; // Amount
             new_transaction->optype=entity3; // Opetaion type
             new_transaction->tno=tno;
+            new_transaction->nexttr=NULL;
             tno++;
 
             //Find last transaction
@@ -280,13 +282,11 @@ void readTransactions(char *inputFile,struct bank *banka){
                 temp_transaction=temp_transaction->nexttr;
             }
             //Got last transaction,add new_transaction to the last transaction
-            temp_transaction=new_transaction;
+            temp_transaction->nexttr=new_transaction;
+
 
 
         }
-
-
-
 
     }
 
@@ -319,23 +319,24 @@ void printBranches(struct bank *head) {
 //banka->branches->custs=banka->branches->custs->nextc;
 //banka->branches->custs->trans->nexttr;
 void printTransactions(struct bank *banka){
-    while(banka->branches!=NULL){
-        // Print branch number
-        printf("%s",banka->branches->bname);
-        while(banka->branches->custs!=NULL){
-            //Print branch's customer number
-            printf("%d",banka->branches->custs->cno);
-            while(banka->branches->custs->trans!=NULL){
-                //Print customer's transaction number
-                printf("%d",banka->branches->custs->trans->tno);
-                //Go to the next branch
-                banka->branches->custs->trans=banka->branches->custs->trans->nexttr;
-            }
-            banka->branches->custs=banka->branches->custs->nextc;
+    struct branch *temp_branch=banka->branches;
+    struct customer *temp_customer=banka->branches->custs;
+    //temp_bank.branches
+    while(temp_branch!=NULL){
+        printf("%s \n",temp_branch->bname);
+
+        while(temp_customer!=NULL){
+            //Print all the customer's id and name
+            printf("%d %s",temp_customer->cno,temp_customer->fname);
+            printf("\n");
+            temp_customer=temp_customer->nextc;
         }
-        banka->branches=banka->branches->nextb;
+        // If there is no customer go to the next branch
+        temp_branch=temp_branch->nextb;
     }
+
 }
+
 
 
 int main() {
@@ -343,9 +344,6 @@ int main() {
     struct operation_type *headOp= malloc(sizeof (struct operation_type));
     headOp->nextopt=NULL;
     struct bank *headB = malloc(sizeof(struct bank));
-
-    headB->branches = malloc(sizeof(struct branch));
-    headB->branches->nextb=NULL;
 
     int indexX = 0;
     while (indexX < 10) {
