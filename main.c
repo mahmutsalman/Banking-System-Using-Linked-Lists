@@ -138,8 +138,10 @@ void readBranches(struct bank *bank, char *inputFile) {
 
     }
 }
+
 struct branch  *getProperBranch(struct bank *banka,int entity){
-    for(struct branch *bp = banka->branches; bp; bp = bp->nextb){
+    struct branch *bp=banka->branches;
+    for(; bp; bp = bp->nextb){
         if(bp->bno==entity){
             return bp;
         }
@@ -149,12 +151,24 @@ struct branch  *getProperBranch(struct bank *banka,int entity){
 
 }
 struct customer *getProperCustomer(struct branch *brancha,int customerId){
-    for(struct customer *cs = brancha->custs; cs;cs=cs->nextc){
+    struct customer *cs = brancha->custs;
+    for(;cs;cs=cs->nextc){
         if(cs->cno==customerId){
             return cs;
         }
     }
     return NULL;
+}
+
+void fillCustomerId(struct branch *brancha){
+    int customerID=1;
+    struct customer *temp_customer=brancha->custs;
+
+    while(temp_customer!=NULL){
+        temp_customer->cno=customerID;
+        customerID++;
+        temp_customer=temp_customer->nextc;
+    }
 }
 
 void readCustomers(char *inputFile,struct bank* bank) {
@@ -186,9 +200,9 @@ void readCustomers(char *inputFile,struct bank* bank) {
         struct customer *new_customer= malloc(sizeof (struct customer));
         memcpy(new_customer->fname, entity2, sizeof(entity2));
         memcpy(new_customer->lname, entity3, sizeof(entity3));
-        new_customer->cno=customerNo;
-        customerNo++;
+
         new_customer->nextc=NULL;
+        new_customer->trans=NULL;
 
         if(properBranch->custs==NULL){ //NEREDE SET LENIYOR BU,BRANCH YARATILIRKEN MI
             properBranch->custs=new_customer;
@@ -201,6 +215,8 @@ void readCustomers(char *inputFile,struct bank* bank) {
             }
             properBranch->custs->nextc=new_customer;
         }
+
+
 
     }
 
@@ -217,6 +233,7 @@ void readTransactions(char *inputFile,struct bank *banka){
         printf("There is a error opening the file.");
 
     }
+
     int entity; //Branch number
     int entity2; // Customer id(cid)
     int entity3; //Operation type
@@ -229,17 +246,24 @@ void readTransactions(char *inputFile,struct bank *banka){
 
         //get proper branch
         struct branch *properBranch = getProperBranch(banka,entity);
+        fillCustomerId(properBranch);
+
+
+
+
 
         //get proper customer
+        //entity2 holds customer id
         struct customer *properCustomer = getProperCustomer(properBranch,entity2);
         temp_customer=properCustomer;
         //Add new transaction to proper place in the customer
         //If it is first transaction
-        if(properCustomer->trans==NULL){
-            properCustomer->trans= malloc(sizeof (struct transaction));
-            properCustomer->trans->nexttr=NULL;
-            properCustomer->trans->amount=entity4;
-            properCustomer->trans->optype=entity3;
+        if(temp_customer->trans==NULL){
+            temp_customer->trans= malloc(sizeof (struct transaction));
+            temp_customer->trans->nexttr=NULL;
+            temp_customer->trans->amount=entity4;
+            temp_customer->trans->optype=entity3;
+            temp_customer->trans->tno=tno;
             tno++;
         }
         else{
@@ -251,11 +275,12 @@ void readTransactions(char *inputFile,struct bank *banka){
             tno++;
 
             //Find last transaction
-            while(temp_customer->trans->nexttr!=NULL){
-                temp_customer->trans=temp_customer->trans->nexttr;
+            struct transaction *temp_transaction=temp_customer->trans;
+            while(temp_transaction->nexttr!=NULL){
+                temp_transaction=temp_transaction->nexttr;
             }
-            //Got last transaction
-            temp_customer->trans=new_transaction;
+            //Got last transaction,add new_transaction to the last transaction
+            temp_transaction=new_transaction;
 
 
         }
@@ -290,7 +315,27 @@ void printBranches(struct bank *head) {
     }
 }
 
-
+//banka->branches=banka->branches->nextb;
+//banka->branches->custs=banka->branches->custs->nextc;
+//banka->branches->custs->trans->nexttr;
+void printTransactions(struct bank *banka){
+    while(banka->branches!=NULL){
+        // Print branch number
+        printf("%s",banka->branches->bname);
+        while(banka->branches->custs!=NULL){
+            //Print branch's customer number
+            printf("%d",banka->branches->custs->cno);
+            while(banka->branches->custs->trans!=NULL){
+                //Print customer's transaction number
+                printf("%d",banka->branches->custs->trans->tno);
+                //Go to the next branch
+                banka->branches->custs->trans=banka->branches->custs->trans->nexttr;
+            }
+            banka->branches->custs=banka->branches->custs->nextc;
+        }
+        banka->branches=banka->branches->nextb;
+    }
+}
 
 
 int main() {
@@ -337,7 +382,9 @@ int main() {
             printBranches(headB);
 
 
-        } else if (option == 3) {
+        }
+        // Fill customers
+        else if (option == 3) {
             printf("%s", "Please enter the name of the file :");
             char filenameBank2[20];
             scanf("%s", filenameBank2);
@@ -347,7 +394,10 @@ int main() {
             printf("%s", "Please enter the name of the file :");
             char filenameBank2[20];
             scanf("%s", filenameBank2);
+
             readTransactions(filenameBank2,headB);
+            printTransactions(headB);
+
 
 
         }
