@@ -96,9 +96,7 @@ void readBranches(struct bank *bank, char *inputFile) {
     fPtr = fopen(fileNamex, "r");
     if (fPtr == NULL) {
         printf("There is a error opening the file.");
-
     }
-
     int bno = 1;
     //Create branch
     char entity[20];
@@ -109,14 +107,13 @@ void readBranches(struct bank *bank, char *inputFile) {
     while (fscanf(fPtr, "%s", &entity) != EOF) {
         brancha=bank->branches;
 
-
-        if(iterator==0){
-            memcpy(brancha->bname, entity, sizeof(entity));
-            brancha->nextb=NULL;
-            brancha->custs=NULL;
-            brancha->bno=bno;
+        if(bank->branches==NULL){
+            bank->branches=malloc(sizeof (struct branch));
+            memcpy(bank->branches->bname, entity, sizeof(entity));
+            bank->branches->nextb=NULL;
+            bank->branches->custs=NULL;
+            bank->branches->bno=bno;
             bno++;
-            iterator++;
         }
         else{
             struct branch *new_branch= malloc(sizeof (struct branch));
@@ -130,12 +127,7 @@ void readBranches(struct bank *bank, char *inputFile) {
                 lastNode=lastNode->nextb;
             }
             lastNode->nextb =new_branch;
-
-
         }
-
-
-
     }
 }
 
@@ -195,35 +187,34 @@ void readCustomers(char *inputFile,struct bank* bank) {
         // Find proper branch
         struct branch *properBranch;
         properBranch=getProperBranch(banka,entity);
+        struct customer *customersHead = properBranch->custs;
 
 
         struct customer *new_customer= malloc(sizeof (struct customer));
         memcpy(new_customer->fname, entity2, sizeof(entity2));
         memcpy(new_customer->lname, entity3, sizeof(entity3));
-
         new_customer->nextc=NULL;
         new_customer->trans=NULL;
 
-        if(properBranch->custs==NULL){ //NEREDE SET LENIYOR BU,BRANCH YARATILIRKEN MI
-            properBranch->custs=new_customer;
-
+        //
+        if(customersHead==NULL){ //NEREDE SET LENIYOR BU,BRANCH YAILIRKEN MI
+            properBranch->custs= malloc(sizeof (struct customer));
+            memcpy(properBranch->custs->fname, entity2, sizeof(entity2));
+            memcpy(properBranch->custs->lname, entity3, sizeof(entity3));
+            properBranch->custs->nextc=NULL;
+            properBranch->custs->trans=NULL;
         }
         else{
             // For the first customer? how to add first customer
             //last node's next address will be NULL.
-            while(properBranch->custs->nextc!=NULL){
-                properBranch->custs = properBranch->custs->nextc;
+            while(customersHead->nextc!=NULL){
+                customersHead = customersHead->nextc;
             }
-            properBranch->custs->nextc=new_customer;
-
+            customersHead->nextc=new_customer;
         }
         properBranch= getProperBranch(banka,entity);
         fillCustomerId(properBranch);
-
-
-
     }
-
 }
 
 void readTransactions(char *inputFile,struct bank *banka){
@@ -331,10 +322,7 @@ void printCustomer(struct bank *banka){
         }
         // After printing all the customers, go to next branch
         temp_branch=temp_branch->nextb;
-
     }
-
-
 }
 void printTransactions(struct bank *banka){
     struct branch *temp_branch=banka->branches;
@@ -370,7 +358,7 @@ int main() {
     struct operation_type *headOp= malloc(sizeof (struct operation_type));
     headOp->nextopt=NULL;
     struct bank *headB = malloc(sizeof(struct bank));
-    headB->branches= malloc(sizeof (struct branch));
+    headB->branches= NULL;
 
 
     int indexX = 0;
@@ -399,7 +387,7 @@ int main() {
             headB->optypes=headOp;
 
         }
-        // For bank, creating branches
+        // Create branches
         else if (option == 2) {
             printf("%s", "Please enter the name of the file :");
             char filenameBank[20];
