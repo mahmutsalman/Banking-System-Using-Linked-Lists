@@ -330,16 +330,16 @@ void printTransactions(struct bank *banka){
     struct transaction *temp_transaction;
 
     while(temp_branch!=NULL){
-        printf("%s \n",temp_branch->bname);
+        printf("Branch: %d %s \n",temp_branch->bno,temp_branch->bname);
         temp_customer=temp_branch->custs;
         // Go through custs of temp_branch
         while(temp_customer!=NULL){
             //Print all the customer's id and name
-            printf("%d %s",temp_customer->cno,temp_customer->fname);
+            printf("--  %d %s",temp_customer->cno,temp_customer->fname);
             printf("\n");
             temp_transaction=temp_customer->trans;
             while(temp_transaction!=NULL){
-                printf("%d %s \n",temp_transaction->tno,temp_transaction->amount);
+                printf("--    %d %f \n",temp_transaction->tno,temp_transaction->amount);
                 temp_transaction=temp_transaction->nexttr;
             }
 
