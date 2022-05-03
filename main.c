@@ -27,8 +27,9 @@ struct customer {
     float paid_commission; // to keep the total commission paid by the customer for the transactions
     struct transaction *trans; // to keep the transactions made by the customer
     struct customer *nextc; //  to point to the next customer in the same branch of the bank
-
 };
+
+
 
 
 struct branch {
@@ -243,11 +244,6 @@ void readTransactions(char *inputFile,struct bank *banka){
         //get proper branch
        properBranch = getProperBranch(banka,entity);
         fillCustomerId(properBranch);
-
-
-
-
-
         //get proper customer
         //entity2 holds customer id
         struct customer *properCustomer = getProperCustomer(properBranch,entity2);
@@ -350,7 +346,33 @@ void printTransactions(struct bank *banka){
     }
 
 }
-
+//Loop through headOp and find proper op type's commissonRate using temp_transaction->optype
+int getcommissionRate(struct operation_type *headOp,int opType){
+    struct operation_type *operationType =headOp;
+        while(operationType!=NULL){
+            if(operationType->optnum==opType){
+                return operationType->commission;
+            }
+            else{
+                operationType=operationType->nextopt;
+            }
+        }
+}
+float getPaidCommisson(struct transaction *transaction,float commissionRate){
+        return transaction->amount*commissionRate;
+}
+struct operation_type *getOperationType(struct operation_type *headOp,int opType){
+    //Loop through headOp and find proper operation type with given opType value
+    struct operation_type *temp_operation_type=headOp;
+    while(temp_operation_type!=NULL){
+        if(temp_operation_type->optnum==opType){
+            return temp_operation_type;
+        }
+        else{
+            temp_operation_type=temp_operation_type->nextopt;
+        }
+    }
+}
 
 
 int main() {
@@ -412,17 +434,45 @@ int main() {
 
             readTransactions(filenameBank2,headB);
             printTransactions(headB);
-
-
-
         }
         //option 5
         else{
-
+        // Go through each branch
+        // For each customer
+        // For each transaction
+        // Print its details
+        struct branch *temp_branch=headB->branches;
+        struct customer *temp_customer=temp_branch->custs;
+        struct transaction *temp_transaction=temp_customer->trans;
+        int totalCommission=0;
+            while(temp_branch!=NULL){
+                printf("Branch: %s\n",temp_branch->bname);
+                while(temp_customer!=NULL){
+                    printf("--> Customer id %d : %s \n",temp_customer->cno,temp_customer->fname);
+                    while (temp_transaction!=NULL){
+                        //WAHERE IS THE COMMISSION RATE? HEADOP
+                        //Loop through headOp and find proper op type's commissonRate using temp_transaction->optype
+                       struct operation_type *temp_opType=getOperationType(headOp,temp_transaction->optype);
+                       //Get operation type's commission
+                        float comissionRate= temp_opType->commission;
+                        //Get
+                        float paidCommission=getPaidCommisson(temp_transaction,comissionRate);
+                        printf("-- tno %d optype %d commission rate %f amount %f paid commission %f \n",temp_transaction->tno,temp_transaction->optype,comissionRate,temp_transaction->amount,paidCommission);
+                        temp_transaction=temp_transaction->nexttr;
+                        totalCommission+=paidCommission;
+                    }
+                    // If there is no transaction, print that
+                    if(temp_customer->trans==NULL){
+                        printf("customer has no transaction \n");
+                    }
+                    else{
+                        printf("paid commission  %d \n",totalCommission);
+                    }
+                    totalCommission=0;
+                    temp_customer=temp_customer->nextc;
+                }
+                temp_branch=temp_branch->nextb;
+            }
         }
-
-
     }
-
-
 }
