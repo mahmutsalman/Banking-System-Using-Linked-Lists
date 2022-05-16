@@ -290,7 +290,7 @@ void printOpType(struct operation_type *head) {
     while (current_node != NULL) {
         setbuf(stdout, 0);
         printf("%s ", current_node->optname);
-        printf("%f\n ", current_node->commission);
+        printf("%.1f \n ", current_node->commission);
 
 
         current_node = current_node->nextopt;
@@ -335,7 +335,7 @@ void printTransactions(struct bank *banka){
             printf("\n");
             temp_transaction=temp_customer->trans;
             while(temp_transaction!=NULL){
-                printf("--    %d %f \n",temp_transaction->tno,temp_transaction->amount);
+                printf("--  ++tno %d operation type  %d amount %.2f \n",temp_transaction->tno,temp_transaction->optype,temp_transaction->amount);
                 temp_transaction=temp_transaction->nexttr;
             }
 
@@ -444,7 +444,7 @@ int main() {
         struct branch *temp_branch=headB->branches;
         struct customer *temp_customer=temp_branch->custs;
         struct transaction *temp_transaction=temp_customer->trans;
-        int totalCommission=0;
+        float totalCommission=0;
             while(temp_branch!=NULL){
                 printf("Branch: %s\n",temp_branch->bname);
                 while(temp_customer!=NULL){
@@ -457,16 +457,17 @@ int main() {
                         float comissionRate= temp_opType->commission;
                         //Get
                         float paidCommission=getPaidCommisson(temp_transaction,comissionRate);
-                        printf("-- tno %d optype %d commission rate %f amount %f paid commission %f \n",temp_transaction->tno,temp_transaction->optype,comissionRate,temp_transaction->amount,paidCommission);
-                        temp_transaction=temp_transaction->nexttr;
                         totalCommission+=paidCommission;
+                        printf("-- tno %d optype %d commission rate %%0.2f amount %.2f paid commission %.2f total commission %.2f   \n",temp_transaction->tno,temp_transaction->optype,comissionRate,temp_transaction->amount,paidCommission,totalCommission);
+                        temp_transaction=temp_transaction->nexttr;
+
                     }
                     // If there is no transaction, print that
                     if(temp_customer->trans==NULL){
                         printf("customer has no transaction \n");
                     }
                     else{
-                        printf("paid commission  %d \n",totalCommission);
+                        printf("paid commission  %.2f \n",totalCommission);
                     }
                     totalCommission=0;
                     temp_customer=temp_customer->nextc;
