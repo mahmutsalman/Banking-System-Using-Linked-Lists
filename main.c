@@ -419,7 +419,7 @@ int main() {
 
 
         }
-        // Fill customers
+        // Fill customers into branches
         else if (option == 3) {
             printf("%s", "Please enter the name of the file :");
             char filenameBank2[20];
@@ -442,10 +442,11 @@ int main() {
         // For each transaction
         // Print its details
         struct branch *temp_branch=headB->branches;
-        struct customer *temp_customer=temp_branch->custs;
-        struct transaction *temp_transaction=temp_customer->trans;
+
         float totalCommission=0;
             while(temp_branch!=NULL){
+                struct customer *temp_customer=temp_branch->custs;
+                struct transaction *temp_transaction=temp_customer->trans;
                 printf("Branch: %s\n",temp_branch->bname);
                 while(temp_customer!=NULL){
                     printf("--> Customer id %d : %s \n",temp_customer->cno,temp_customer->fname);
