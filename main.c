@@ -12,6 +12,7 @@ struct operation_type {
 
 };
 
+
 struct transaction {
     int optype; //to specify the type of transaction performed
     int tno; //indicates the id of transaction made by the customer
@@ -44,7 +45,8 @@ struct bank {
     struct operation_type *optypes;// to hold the transaction types offered by the bank
 };
 
-void readOperationTypes(struct operation_type *headOpType, char *inputFile) {
+struct operation_type *readOperationTypes(struct operation_type *headOpType, char *inputFile) {
+    struct operation_type *temp_operation_type = malloc(sizeof (struct operation_type));
     FILE *fPtr;
     char fileNamex[100];
     strcpy(fileNamex, "C:\\Users\\asxdc\\CLionProjects\\DataProject-1\\");
@@ -58,34 +60,35 @@ void readOperationTypes(struct operation_type *headOpType, char *inputFile) {
     char entity[20];
     float entity2;
 
-    int iterator = 0;// For adding to head
+
     int optnum=1;
 
-    while (fscanf(fPtr, "%s%0.2f", &entity, &entity2) != EOF) {
-        struct operation_type *new_branch = malloc(sizeof(struct operation_type));
-        new_branch->nextopt = NULL;
-        memcpy(new_branch->optname, entity, sizeof(entity));
-        new_branch->commission = entity2;
+    while (fscanf(fPtr, "%s%f", &entity, &entity2) != EOF) {
+        struct operation_type *new_operation_type = malloc(sizeof(struct operation_type));
+        memcpy(new_operation_type->optname, entity, sizeof(entity));
+        new_operation_type->commission = entity2;
+        new_operation_type->optnum=optnum;
+        new_operation_type->nextopt = NULL;
 
-        if (iterator == 0) {
-            headOpType->nextopt = NULL;
+        if(headOpType==NULL){
+            headOpType= malloc(sizeof (struct operation_type));
             memcpy(headOpType->optname, entity, sizeof(entity));
             headOpType->commission = entity2;
             headOpType->optnum=optnum;
-            iterator++;
-        } else {
-            struct operation_type *lastNode = headOpType;
-            while (lastNode->nextopt != NULL) {
-                lastNode = lastNode->nextopt;
-            }
-            lastNode->nextopt = new_branch;
+            headOpType->nextopt = NULL;
             optnum++;
-            lastNode->optnum=optnum;
 
         }
-
-
+        else{
+            struct operation_type *lastNode=headOpType;
+            while(lastNode->nextopt!=NULL){
+                lastNode=lastNode->nextopt;
+            }
+            lastNode->nextopt=new_operation_type;
+            optnum++;
+        }
     }
+    return headOpType;
 
 }
 
@@ -276,13 +279,8 @@ void readTransactions(char *inputFile,struct bank *banka){
             //Got last transaction,add new_transaction to the last transaction
             temp_transaction->nexttr=new_transaction;
 
-
-
         }
-
     }
-
-
 }
 
 /* Print all the elements in the linked list */
@@ -380,8 +378,9 @@ int main() {
     struct bank *headB = malloc(sizeof(struct bank));
     headB->branches= NULL;
 
-    struct operation_type *headOp= malloc(sizeof (struct operation_type));
-    headOp->nextopt=NULL;
+    struct operation_type *headOp= NULL;
+    struct operation_type *temp_head_op= malloc(sizeof (struct operation_type));
+
 
 
 
@@ -405,10 +404,10 @@ int main() {
             char filenameOpTypes[20];
             scanf("%s", filenameOpTypes);
 
-            readOperationTypes(headOp, filenameOpTypes);
+            temp_head_op=readOperationTypes(headOp, filenameOpTypes);
             // Print all operation types which is in headOp
-            printOpType(headOp);
-            headB->optypes=headOp;
+            printOpType(temp_head_op);
+            headB->optypes=temp_head_op;
 
         }
         // Create branches
@@ -444,40 +443,48 @@ int main() {
                 struct customer *temp_customer=temp_branch->custs;
                 struct transaction *temp_transaction;
                 float totalCommission=0;
-                temp_transaction =temp_customer->trans; //Kadıköy ün ilk customer'ının ilk transaction'ın head'i
-                printf("Branch: %s\n",temp_branch->bname);
-                while(temp_customer!=NULL){
-                    printf("--> Customer id %d : %s \n",temp_customer->cno,temp_customer->fname);
-                    while (temp_transaction!=NULL){
-                        //WAHERE IS THE COMMISSION RATE? HEADOP
-                        //Loop through headOp and find proper op type's commissonRate using temp_transaction->optype
-                        struct operation_type *temp_opType=getOperationType(headOp,temp_transaction->optype);
-                        //Get operation type's commission
-                        float comissionRate= temp_opType->commission;
-                        //Get
-                        float paidCommission=getPaidCommisson(temp_transaction,comissionRate);
-                        totalCommission+=paidCommission;
-                        printf("-- tno %d optype %d commission rate %0.2f amount %.2f paid commission %.2f total commission %.2f   \n",temp_transaction->tno,temp_transaction->optype,comissionRate,temp_transaction->amount,paidCommission,totalCommission);
-                        temp_transaction=temp_transaction->nexttr;
-                    }
-                    // All transaction of the current customer is done.
-                    // If there is no transaction, print that
-                    if(temp_customer->trans==NULL){
-                        printf("customer has no transaction \n");
-                    }
-                    else{
-                        printf("paid commission  %.2f \n",totalCommission);
-                    }
-                    totalCommission=0;
-                    temp_customer=temp_customer->nextc; // Go next customer in the same Branch
-                    if(temp_customer==NULL){
-                    }
-                    else{
-                        temp_transaction = temp_customer->trans;
+                //temp_customer null olduğunda means o branchin tüm customer ları bitti, go next branch
+                if(temp_customer==NULL){
+                    //Go next branch
+                }
+                else{
+                    temp_transaction =temp_customer->trans; //Kadıköy ün ilk customer'ının ilk transaction'ın head'i
+                    printf("Branch: %s\n",temp_branch->bname);
+                    while(temp_customer!=NULL){
+                        printf("--> Customer id %d : %s \n",temp_customer->cno,temp_customer->fname);
+                        while (temp_transaction!=NULL){
+
+                            //Loop through headOp and find proper op type's commissonRate using temp_transaction->optype
+                            struct operation_type *temp_opType=getOperationType(temp_head_op,temp_transaction->optype);
+                            //Get operation type's commission
+                            float comissionRate= temp_opType->commission;
+                            //Get
+                            float paidCommission=getPaidCommisson(temp_transaction,comissionRate);
+                            totalCommission+=paidCommission;
+                            printf("-- tno %d optype %d commission rate %0.2f amount %.2f paid commission %.2f total commission %.2f   \n",temp_transaction->tno,temp_transaction->optype,comissionRate,temp_transaction->amount,paidCommission,totalCommission);
+                            temp_transaction=temp_transaction->nexttr;
+                        }
+                        // All transaction of the current customer is done.
+                        // If there is no transaction, print that
+                        if(temp_customer->trans==NULL){
+                            printf("customer has no transaction \n");
+                        }
+                        else{
+                            printf("paid commission  %.2f \n",totalCommission);
+                        }
+                        totalCommission=0;
+                        temp_customer=temp_customer->nextc; // Go next customer in the same Branch
+                        if(temp_customer==NULL){
+                        }
+                        else{
+                            temp_transaction = temp_customer->trans;
+                        }
                     }
                 }
-                //.......
+
+
             }
+            printf("Program has finished successfully...See you next time");
             return 0;
         }
     }
