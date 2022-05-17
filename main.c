@@ -238,18 +238,19 @@ void readTransactions(char *inputFile,struct bank *banka){
     int entity2; // Customer id(cid)
     int entity3; //Operation type
     float entity4; //transaciton-> amount
-    int tno=1;
 
     struct customer *temp_customer;
     struct branch *properBranch;
+    int tno;
 
     while (fscanf(fPtr, "%d %d %d %f", &entity, &entity2, &entity3,&entity4) != EOF) {
-
+        tno=1;
         //get proper branch
-       properBranch = getProperBranch(banka,entity);
+        properBranch = getProperBranch(banka,entity);
         fillCustomerId(properBranch);
         //get proper customer
         //entity2 holds customer id
+
         struct customer *properCustomer = getProperCustomer(properBranch,entity2);
         temp_customer=properCustomer;
         //Add new transaction to proper place in the customer
@@ -260,24 +261,28 @@ void readTransactions(char *inputFile,struct bank *banka){
             temp_customer->trans->amount=entity4;
             temp_customer->trans->optype=entity3;
             temp_customer->trans->tno=tno;
-            tno++;
         }
         else{
             // Create a new transaction
             struct transaction *new_transaction= malloc(sizeof(struct transaction) );
             new_transaction->amount=entity4; // Amount
             new_transaction->optype=entity3; // Opetaion type
-            new_transaction->tno=tno;
             new_transaction->nexttr=NULL;
-            tno++;
 
             //Find last transaction
             struct transaction *temp_transaction=temp_customer->trans;
+
             while(temp_transaction->nexttr!=NULL){
+                temp_transaction->tno=tno;
                 temp_transaction=temp_transaction->nexttr;
+                tno++;
             }
+            temp_transaction->tno=tno;
+            tno++;
             //Got last transaction,add new_transaction to the last transaction
+            new_transaction->tno=tno;
             temp_transaction->nexttr=new_transaction;
+
 
         }
     }
