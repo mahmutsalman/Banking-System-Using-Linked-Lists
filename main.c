@@ -91,7 +91,7 @@ struct operation_type *readOperationTypes(struct operation_type *headOpType, cha
     return headOpType;
 
 }
-
+// For reading branches
 void readBranches(struct bank *bank, char *inputFile) {
     FILE *fPtr;
     char fileNamex[100];
@@ -103,7 +103,7 @@ void readBranches(struct bank *bank, char *inputFile) {
         printf("There is a error opening the file.");
     }
     int bno = 1;
-    //Create branch
+
     char entity[20];
     int iterator=0;
     //Take first branch
@@ -136,6 +136,7 @@ void readBranches(struct bank *bank, char *inputFile) {
     }
 }
 
+// Get proper branch based on given number(entity)
 struct branch  *getProperBranch(struct bank *banka,int entity){
     struct branch *bp=banka->branches;
     for(; bp; bp = bp->nextb){
@@ -147,6 +148,7 @@ struct branch  *getProperBranch(struct bank *banka,int entity){
     return NULL;
 
 }
+// Get proper customer from spesific branch using customerID
 struct customer *getProperCustomer(struct branch *brancha,int customerId){
     struct customer *cs = brancha->custs;
     for(;cs;cs=cs->nextc){
@@ -157,6 +159,7 @@ struct customer *getProperCustomer(struct branch *brancha,int customerId){
     return NULL;
 }
 
+// Setting customer ids
 void fillCustomerId(struct branch *brancha){
     int customerID=1;
     struct customer *temp_customer=brancha->custs;
@@ -167,7 +170,7 @@ void fillCustomerId(struct branch *brancha){
         temp_customer=temp_customer->nextc;
     }
 }
-
+// Reading customers
 void readCustomers(char *inputFile,struct bank* bank) {
     FILE *fPtr;
     char fileNamex[100];
@@ -186,7 +189,6 @@ void readCustomers(char *inputFile,struct bank* bank) {
 
     while (fscanf(fPtr, "%d %s %s", &entity, &entity2, &entity3) != EOF) {
 
-        // entity ile  ikinci branche gidicem,o branch bank head'in içinde
         struct bank* banka;
         banka=bank;
         // Find proper branch
@@ -201,8 +203,8 @@ void readCustomers(char *inputFile,struct bank* bank) {
         new_customer->nextc=NULL;
         new_customer->trans=NULL;
 
-        //
-        if(customersHead==NULL){ //NEREDE SET LENIYOR BU,BRANCH YAILIRKEN MI
+
+        if(customersHead==NULL){
             properBranch->custs= malloc(sizeof (struct customer));
             memcpy(properBranch->custs->fname, entity2, sizeof(entity2));
             memcpy(properBranch->custs->lname, entity3, sizeof(entity3));
@@ -210,8 +212,6 @@ void readCustomers(char *inputFile,struct bank* bank) {
             properBranch->custs->trans=NULL;
         }
         else{
-            // For the first customer? how to add first customer
-            //last node's next address will be NULL.
             while(customersHead->nextc!=NULL){
                 customersHead = customersHead->nextc;
             }
@@ -222,6 +222,7 @@ void readCustomers(char *inputFile,struct bank* bank) {
     }
 }
 
+// Read transactions
 void readTransactions(char *inputFile,struct bank *banka){
     FILE *fPtr;
     char fileNamex[100];
@@ -301,6 +302,7 @@ void printOpType(struct operation_type *head) {
     }
 }
 
+//Print branches
 void printBranches(struct bank *head) {
     struct branch *current_node = head->branches;
     while (current_node != NULL) {
@@ -309,7 +311,7 @@ void printBranches(struct bank *head) {
         current_node = current_node->nextb;
     }
 }
-
+//Print customers
 void printCustomer(struct bank *banka){
     struct branch *temp_branch=banka->branches;
     struct customer *temp_customer;
@@ -324,6 +326,7 @@ void printCustomer(struct bank *banka){
         temp_branch=temp_branch->nextb;
     }
 }
+//Print transactions
 void printTransactions(struct bank *banka){
     struct branch *temp_branch=banka->branches;
     struct customer *temp_customer;
@@ -386,11 +389,7 @@ int main() {
     struct operation_type *headOp= NULL;
     struct operation_type *temp_head_op= malloc(sizeof (struct operation_type));
 
-
-
-
-    int indexX = 0;
-    while (indexX < 10) {
+    while (1) {
         printf("%s", "\n");
         printf("%s", "1)Read operations types from the file\n");
         printf("%s", "2)Read branches from the file\n");
@@ -433,7 +432,10 @@ int main() {
             readCustomers(filenameBank2,headB);
             printCustomer(headB);
 
-        } else if(option==4) {
+        }
+        // option 4
+        // Read transaction file
+        else if(option==4) {
             printf("%s", "Please enter the name of the file :");
             char filenameBank2[20];
             scanf("%s", filenameBank2);
@@ -448,12 +450,12 @@ int main() {
                 struct customer *temp_customer=temp_branch->custs;
                 struct transaction *temp_transaction;
                 float totalCommission=0;
-                //temp_customer null olduğunda means o branchin tüm customer ları bitti, go next branch
+
                 if(temp_customer==NULL){
                     //Go next branch
                 }
                 else{
-                    temp_transaction =temp_customer->trans; //Kadıköy ün ilk customer'ının ilk transaction'ın head'i
+                    temp_transaction =temp_customer->trans;
                     printf("Branch: %s\n",temp_branch->bname);
                     while(temp_customer!=NULL){
                         printf("--> Customer id %d : %s \n",temp_customer->cno,temp_customer->fname);
