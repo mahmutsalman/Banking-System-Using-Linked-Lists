@@ -50,6 +50,7 @@ struct operation_type *readOperationTypes(struct operation_type *headOpType, cha
     FILE *fPtr;
     char fileNamex[100];
 
+
     /*The path that contains .txt files ex. path C:\Users\asxdc\CLionProjects\DataProject-1\*/
     strcpy(fileNamex, "C:\\Users\\asxdc\\CLionProjects\\DataProject-1\\");
 
