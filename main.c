@@ -49,6 +49,8 @@ struct operation_type *readOperationTypes(struct operation_type *headOpType, cha
     struct operation_type *temp_operation_type = malloc(sizeof (struct operation_type));
     FILE *fPtr;
     char fileNamex[100];
+
+    /*The path that contains .txt files ex. path C:\Users\asxdc\CLionProjects\DataProject-1\*/
     strcpy(fileNamex, "C:\\Users\\asxdc\\CLionProjects\\DataProject-1\\");
 
     strcat(fileNamex, inputFile);
@@ -95,6 +97,8 @@ struct operation_type *readOperationTypes(struct operation_type *headOpType, cha
 void readBranches(struct bank *bank, char *inputFile) {
     FILE *fPtr;
     char fileNamex[100];
+
+    /*The path that contains .txt files ex. path C:\Users\asxdc\CLionProjects\DataProject-1\*/
     strcpy(fileNamex, "C:\\Users\\asxdc\\CLionProjects\\DataProject-1\\");
 
     strcat(fileNamex, inputFile);
@@ -174,6 +178,8 @@ void fillCustomerId(struct branch *brancha){
 void readCustomers(char *inputFile,struct bank* bank) {
     FILE *fPtr;
     char fileNamex[100];
+
+    /*The path that contains .txt files ex. path C:\Users\asxdc\CLionProjects\DataProject-1\*/
     strcpy(fileNamex, "C:\\Users\\asxdc\\CLionProjects\\DataProject-1\\");
 
     strcat(fileNamex, inputFile);
@@ -226,6 +232,8 @@ void readCustomers(char *inputFile,struct bank* bank) {
 void readTransactions(char *inputFile,struct bank *banka){
     FILE *fPtr;
     char fileNamex[100];
+
+    /*The path that contains .txt files ex. path C:\Users\asxdc\CLionProjects\DataProject-1\*/
     strcpy(fileNamex, "C:\\Users\\asxdc\\CLionProjects\\DataProject-1\\");
 
     strcat(fileNamex, inputFile);
@@ -338,7 +346,7 @@ void printTransactions(struct bank *banka){
         // Go through custs of temp_branch
         while(temp_customer!=NULL){
             //Print all the customer's id and name
-            printf("--  %d %s",temp_customer->cno,temp_customer->fname);
+            printf("--  %d %s %s ",temp_customer->cno,temp_customer->fname,temp_customer->lname);
             printf("\n");
             temp_transaction=temp_customer->trans;
             while(temp_transaction!=NULL){
@@ -353,18 +361,7 @@ void printTransactions(struct bank *banka){
     }
 
 }
-//Loop through headOp and find proper op type's commissonRate using temp_transaction->optype
-int getcommissionRate(struct operation_type *headOp,int opType){
-    struct operation_type *operationType =headOp;
-        while(operationType!=NULL){
-            if(operationType->optnum==opType){
-                return operationType->commission;
-            }
-            else{
-                operationType=operationType->nextopt;
-            }
-        }
-}
+
 float getPaidCommisson(struct transaction *transaction,float commissionRate){
         return transaction->amount*commissionRate/100;
 }
@@ -445,7 +442,8 @@ int main() {
         }
         //option 5
         else{
-            for (struct branch *temp_branch = headB->branches; temp_branch !=NULL ; temp_branch=temp_branch->nextb) {
+            struct branch *temp_branch;
+            for (temp_branch = headB->branches; temp_branch !=NULL ; temp_branch=temp_branch->nextb) {
                 //ex. Kadıköy
                 struct customer *temp_customer=temp_branch->custs;
                 struct transaction *temp_transaction;
@@ -458,7 +456,7 @@ int main() {
                     temp_transaction =temp_customer->trans;
                     printf("Branch: %s\n",temp_branch->bname);
                     while(temp_customer!=NULL){
-                        printf("--> Customer id %d : %s \n",temp_customer->cno,temp_customer->fname);
+                        printf("--> Customer id %d : %s  %s\n",temp_customer->cno,temp_customer->fname,temp_customer->lname);
                         while (temp_transaction!=NULL){
 
                             //Loop through headOp and find proper op type's commissonRate using temp_transaction->optype
